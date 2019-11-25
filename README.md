@@ -1,31 +1,49 @@
 # Trotbot
 
-Find scripts in trotbot_ws/src/navigation
+## About 
+<p align="center">
+  <img src="https://github.com/ERC-BPGC/Trotbot/blob/master/Trotbot.jpg" alt="drawing" width="400"/>
+</p>
 
-Prerequisites:
-- ROS Kinetic
-- Python catkin-tools
+**Trotbot** is a robot designed to serve as a delivery robot in an indoor environment. The deliverables will be placed inside the container. It will be able to autonomously navigate around obstacles and reach waypoints set in and around its environment. Identification tags will be used by the Bot to locate the rooms and localize itself.
 
 
-To use this workspace do:
+## Prerequisites:
+- [ROS Kinetic](http://wiki.ros.org/kinetic/Installation) on Ububtu 16.04
+- [Python catkin-tools](https://catkin-tools.readthedocs.io/en/latest/installing.html) 
+- [librealsense](https://github.com/IntelRealSense/librealsense)
+- [rplidar_ros](https://github.com/Slamtec/rplidar_ros)
+- [shapely](https://shapely.readthedocs.io/en/stable/manual.html) 
+- descartes
+- numpy
 
+To install the python dependencies:
+```bash
+pip2 install --user $LIBRARY_NAME
 ```
-cd trotbot_ws
+
+
+To use this repo do:
+
+```bash
+cd trotbot_ws/src
+git clone https://github.com/ERC-BPGC/Trotbot.git 
+cd ..
 catkin build
 source devel/setup.bash
+
+# run scripts from the navigation package
 ```
 
-## TODO
+**Note**: The packages have been tested with ROS Kinetic on Ubuntu 16.04.
 
-- [X] Transfer dynamic parameters from class init to Planning()
-- [X] Remove do_rrt()
-- [X] Test new RRT code
-- [X] Add animation feature to RRT code (just add plt.show() at the end of your script)
-- [X] Update los_optimizer
-- [ ] Using some kind of python collection for storing path (05/11/19)
-- [ ] Use namedtuple() for coordinates
-- [ ] Implement adjustable sample_area
-- [X] Transform path in odom update
-- [X] Modify path_planner to call any type of algorithm
-- [X] Make skeleton ROS code for each node
-- [ ] Write Controller Action server
+-----------------------
+
+## Contributors:
+- Atharv Sonawane 
+- Ojit Mehta
+- Rishikesh Vanarse
+- Harshal Deshpande
+- Mihir Dharmadhikari
+- Mohit Gupta
+- Atman Kar

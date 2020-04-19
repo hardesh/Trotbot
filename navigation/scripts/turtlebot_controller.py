@@ -7,7 +7,7 @@ import actionlib
 import shapely
 from shapely.geometry import Point, LineString
 import math
-import numpy.linalg as linalg
+import numpy as np
 import utils
 import collections
 from nav_msgs.msg import Odometry
@@ -37,10 +37,7 @@ class Controller():
         self.odom_update = rospy.Subscriber("odom", Odometry, self.__odom_update)
         self.vel_pub = rospy.Publisher("cmd_vel", Twist, queue_size=5)
 
-        self.rate = rospy.Rate(100)
         rospy.loginfo("...Controller Initialized...")
-        
-        self.server.start()
 
 
     def __set_goal(self, moveGoal):
@@ -49,17 +46,8 @@ class Controller():
             Updates the goal location
             Arg: /navigation/MoveGoal
         """
-        self.request_received = True
-        self.goal = Point(moveGoal.goal.x, moveGoal.goal.y, 0)
-
-        while not self.goal.x < REACH_DIST and self.goal.y < REACH_DIST:
-            if self.request_received and self.goal.x < REACH_DIST and self.goal.y < REACH_DIST:
-                self.result = True
-                self.server.set_succeeded(self.result, "Reached Goal Point :)")
-
-            if self.server.is_preempt_requested():
-                self.result = False
-                self.server.set_preempted(self.result, "Goal Preempt")
+        self.request_received = False
+        self.goal = Point(moveGoal.goal)
 
 
     def __odom_update(self, data):
@@ -70,9 +58,15 @@ class Controller():
         self.position, self.orientation = utils.unwrap_pose(data.pose.pose)
         self.goal = utils.transform(Point(self.goal), self.position, self.orientation)
 
-        self.__set_velocity()
+        if self.request_received and self.goal.x < REACH_DIST and self.goal.y < REACH_DIST:
+            self.result = True
+            self.server.set_succeeded(self.result, "Reached Goal Point :)")
 
-        self.rate.sleep()
+        if self.server.is_preempt_requested():
+            self.result = False
+            self.server.set_preempted(self.result, "Goal Preempt")
+
+        self.__set_velocity()
 
 
     def __set_velocity(self):
@@ -80,18 +74,16 @@ class Controller():
             Publishes velocity on /cmd_vel
             Simple proportional logic is used to generate the velocities
         """
-        goal_norm = linalg.norm(self.goal)
-        
-        self.velocity.linear.x = self.goal.x / goal_norm
-        self.velocity.linear.y = self.goal.y / goal_norm
+
+        self.velocity.linear.x = 1
+        self.velocity.angular.z = np.arctan2(self.goal.y, self.goal.x)
 
         # rospy.loginfo("Publishing velocity")
-        # self.vel_pub.publish(self.velocity)
+        self.vel_pub.publish(self.velocity)
 
 
 def main():
     my_controller = Controller()
-
     rospy.spin()
 
 if __name__ == "__main__":
@@ -99,8 +91,6 @@ if __name__ == "__main__":
 
     try:
         main()
-
-        rospy.logwarn("Killing controller!")
 
     except Exception as err:
         rospy.loginfo("%s was thrown",err)
